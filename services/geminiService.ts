@@ -2,11 +2,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { EquipmentFilter } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API_KEY environment variable not set");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
 const filterSchema = {
     type: Type.OBJECT,
@@ -23,6 +25,7 @@ const filterSchema = {
 
 export const getFiltersFromQuery = async (query: string): Promise<EquipmentFilter> => {
     try {
+        const ai = getAI();
         const result = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: `The user's query is: "${query}". Please generate the corresponding JSON filter.`,
